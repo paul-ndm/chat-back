@@ -26,10 +26,10 @@ io.on("connection", (socket) => {
         console.log(arg); // world
       })
 
-    socket.on('send-message', ({recipientsIds, text})=> {
+    socket.on('send-message', ({recipients, text})=> {
       console.log('message received')
       io.to(id).emit('receive-message', {
-        recipientsIds, sender: id, text
+        recipients, sender: id, text
             })
         // recipients.forEach(recipient => {
         //     socket.broadcast.to(recipient).emit('receive-message', {
@@ -38,9 +38,9 @@ io.on("connection", (socket) => {
         // })
     })
 
-    socket.on("chatMessage", (data) => {
-    console.log('chat message', data)
-    io.to(id).emit("chatMessage", data);
+    socket.on("private-message", ({recipientId, text}) => {
+    console.log("private-message", {recipientId, text})
+    io.emit("receive-private-message", {recipientId, text, sender: id});
     });
 
   });
