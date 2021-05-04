@@ -3,10 +3,8 @@ import http from 'http'
 import { Server } from "socket.io"
 import cors from 'cors'
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+//import contacts from './routes/contacts.js'
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const port = process.env.PORT || 5000;
 const app = express()
 app.use(cors())
@@ -18,29 +16,24 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-    socket.emit("test", "frombackend");
     const id = socket.handshake.query.id
     socket.join(id)
 
-    socket.on("test2", (arg) => {
-        console.log(arg); // world
-      })
-
-    socket.on('send-message', ({recipients, text})=> {
-      console.log('message received')
-      io.to(id).emit('receive-message', {
-        recipients, sender: id, text
+    socket.on('send-message', ({eventId, recipients, message})=> {
+      // io.to(id).emit('receive-message', {eventId,
+      //   recipients, sender: id, message
+      //       })
+        recipients.forEach(recipient => {
+          console.log('message sent to:', recipient)
+            socket.to(recipient).emit('receive-message', {
+                eventId, recipients, sender: id, message
             })
-        // recipients.forEach(recipient => {
-        //     socket.broadcast.to(recipient).emit('receive-message', {
-        //         recipients, sender: id, text
-        //     })
-        // })
+        })
     })
 
     socket.on("private-message", ({recipientId, text}) => {
     console.log("private-message", {recipientId, text})
-    io.emit("receive-private-message", {recipientId, text, sender: id});
+    socket.to(recipientId).emit("receive-private-message", {recipientId, text, sender: id});
     });
 
   });
