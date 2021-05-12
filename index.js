@@ -39,8 +39,14 @@ io.on("connection", (socket) => {
     socket.on('add-member', async ({event, newMembers}) => {
         await addMember(event.eventId, newMembers)
         event.recipients.forEach(recipient => {
-          socket.to(recipient.id).emit('added-Member', {eventId: event.eventId, newMembers} )
+          socket.to(recipient.id).emit('added-Member', {eventId: event.eventId, newMembers})
         })
+    })
+
+    socket.on('leaving-event', ({event, userId}) => {
+      event.recipients.forEach(recipient => {
+        socket.to(recipient.id).emit('leaving-event', {eventId: event.eventId, userId})
+      })
 
     })
 
